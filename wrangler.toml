@@ -10,5 +10,5 @@ database_id = "0cf3acea-bdd9-420e-97b8-2a503ea14714"
 
 [vars]
 WA_VERIFY_TOKEN = "set-in-dashboard-or-here"
-ROOT_PUBLIC_KEY = "base64-ed25519-root-public-key"
-SIGNING_KEY_ID  = "key-xxxxxxxxxxxxxxxx"
+ROOT_PUBLIC_KEY = "PNa0Me765rf+G4JsuHU58Z2R2ejVxFa5jyqiUfFq8Dc="
+SIGNING_KEY_ID  = "key-d9cdce7db8b0c2c9"
