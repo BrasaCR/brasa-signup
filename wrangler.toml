@@ -1,0 +1,26 @@
+name = "brasa-signup"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# brasa-citizens D1 — bound as env.DB
+[[d1_databases]]
+binding = "DB"
+database_name = "brasa-citizens"
+database_id = "4a475c36-9846-4cc5-aa71-b48fe30d9cf9"
+
+[vars]
+# Public, non-secret config:
+WA_VERIFY_TOKEN = "set-in-dashboard-or-here"
+# Credential chain (from the key ceremony — see scripts/keygen.js):
+ROOT_PUBLIC_KEY = "base64-ed25519-root-public-key"
+SIGNING_KEY_ID  = "key-xxxxxxxxxxxxxxxx"
+# Recovery cool-down (ms); default 24h if unset:
+# RECOVERY_COOLDOWN_MS = "86400000"
+
+# Secrets — set with `wrangler secret put <NAME>` (never commit these):
+#   MSISDN_PEPPER         keyed-HMAC pepper for phone-number hashing
+#   WA_TOKEN              WhatsApp Cloud API bearer token
+#   WA_PHONE_ID           WhatsApp Business phone-number id
+#   SIGNING_PRIVATE_KEY   intermediate Ed25519 private key (signs credentials)
+#   ADMIN_TOKEN           bearer token gating POST /credentials/issue
+# The ROOT private key is NEVER a Worker secret — it stays offline.
