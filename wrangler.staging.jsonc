@@ -5,6 +5,7 @@
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "vars": { "OPERATOR_ACCESS_REQUIRED": "false" },
   "d1_databases": [{ "binding": "IDENTITY_DB", "database_name": "brasa-identity-staging", "database_id": "df39f4ff-b3e8-4dcc-acbd-932995200322", "migrations_dir": "migrations" }],
   "observability": { "enabled": true, "logs": { "head_sampling_rate": 1 }, "traces": { "enabled": true, "head_sampling_rate": 0.05 } }
 }
