@@ -12,6 +12,6 @@ Access tokens expire after 15 minutes and cannot be renewed beyond their eight-h
 
 The staging Worker and D1 database are independent from production GovID. No production identity rows, phone anchors, dates of birth, credentials, activity, or recovery records are copied. Education consumes this endpoint through a Worker service binding and performs school-role authorization in its own database.
 
-Invitation provisioning remains an operator action: create a random one-time code, store only its hash with the Education audience and expiry, and separately grant the matching display ID a school role in Education. The administrator receives the raw code once. The browser keeps the resulting access token in page memory only; explicit logout revokes it.
+Invitation provisioning is initiated only after Education verifies a school administrator. Education calls Identity through its service binding with a shared Worker secret; the internal issuer fails closed without that credential. Identity creates a random one-time code, stores only its hash with the Education audience and expiry, and returns the raw code once. The browser keeps the resulting access token in page memory only; explicit logout revokes it.
 
-The staging entry point intentionally exposes only `/health`, the three session lifecycle routes, and `/api/education/school-platform`; all broader Signup, verification, payment, credential, and messaging routes return 404.
+The staging entry point exposes `/health`, the three public session lifecycle routes, `/api/education/school-platform`, and the service-credential-protected `/internal/education/invitations` route; all broader Signup, verification, payment, credential, and messaging routes return 404.

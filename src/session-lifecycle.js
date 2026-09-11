@@ -7,10 +7,31 @@ async function body(request) {
   const text = await request.text(); if (text.length > MAX_BODY) return null;
   try { return JSON.parse(text); } catch { return null; }
 }
-function opaqueToken() {
+export function opaqueToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(48));
   let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+async function serviceAuthorized(request, env) {
+  const supplied = request.headers.get('x-brasa-service-authorization') || '', expected = env.EDUCATION_ISSUER_SECRET || '';
+  if (supplied.length < 32 || expected.length < 32 || supplied.length !== expected.length) return false;
+  const encoder = new TextEncoder(), left = encoder.encode(supplied), right = encoder.encode(expected);
+  if (typeof crypto.subtle.timingSafeEqual === 'function') return crypto.subtle.timingSafeEqual(left, right);
+  let difference = 0; for (let index = 0; index < left.length; index += 1) difference |= left[index] ^ right[index];
+  return difference === 0;
+}
+
+export async function issueInvitation(request, env) {
+  if (request.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
+  if (!env.IDENTITY_DB) return reply({ error: 'identity_database_unavailable' }, 503);
+  if (!(await serviceAuthorized(request, env))) return reply({ error: 'service_authorization_required' }, 401);
+  const input = await body(request), displayId = String(input?.display_id || '').trim().toUpperCase(), assuranceLevel = Number(input?.assurance_level || 1);
+  const lifetime = Math.min(604800, Math.max(900, Number(input?.expires_in || 86400)));
+  if (!/^BRA-[A-Z0-9-]{5,40}$/.test(displayId) || !Number.isInteger(assuranceLevel) || assuranceLevel < 1 || assuranceLevel > 3) return reply({ error: 'invalid_invitation' }, 400);
+  const code = opaqueToken(), now = new Date(), expiresAt = new Date(now.getTime() + lifetime * 1000).toISOString();
+  await env.IDENTITY_DB.prepare('INSERT INTO session_invitations (id, code_hash, display_id, audience, assurance_level, expires_at, consumed_at, created_at) VALUES (?,?,?,?,?,?,NULL,?)').bind(crypto.randomUUID(), await tokenHash(code), displayId, 'brasa-education', assuranceLevel, expiresAt, now.toISOString()).run();
+  return reply({ invitation_code: code, display_id: displayId, audience: 'brasa-education', expires_at: expiresAt }, 201);
 }
 async function insertSession(env, profile, familyId, familyExpiresAt, rotatedFrom = null) {
   const token = opaqueToken(), now = new Date(), expires = new Date(Math.min(now.getTime() + ACCESS_SECONDS * 1000, Date.parse(familyExpiresAt)));
