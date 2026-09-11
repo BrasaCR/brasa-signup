@@ -1,0 +1,4 @@
+node_modules/
+.worker-dry-run/
+.wrangler/
+.dev.vars*

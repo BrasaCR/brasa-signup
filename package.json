@@ -10,9 +10,12 @@
     "db:init": "wrangler d1 execute brasa-citizens --file=./schema.sql",
     "db:init:local": "wrangler d1 execute brasa-citizens --local --file=./schema.sql",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "package:staging": "wrangler deploy --config wrangler.staging.jsonc --dry-run --outdir .worker-dry-run",
+    "deploy:staging": "wrangler deploy --config wrangler.staging.jsonc",
+    "smoke:staging": "node scripts/smoke-staging.mjs"
   },
   "devDependencies": {
-    "wrangler": "^3.114.17"
+    "wrangler": "4.131.1"
   }
 }

@@ -13,6 +13,7 @@ import { registerCampus, registerOfficer, verifyInPerson, recoverInPerson, listV
 import { snapshot } from "./metrics.js";
 import { createShareByDisplayId, revokeShare, getReportByToken, qrSvg, renderReportHtml } from "./report.js";
 import { getFullByDisplayId } from "./db.js";
+import { introspectEducationSession } from "./introspection.js";
 
 const isAdmin = (req, env) =>
   env.ADMIN_TOKEN && req.headers.get("authorization") === `Bearer ${env.ADMIN_TOKEN}`;
@@ -21,7 +22,8 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
 
-    if (url.pathname === "/health") return new Response("ok");
+    if (url.pathname === "/health") return Response.json({ ok: true, service: "brasa-identity", version: 1 });
+    if (url.pathname === "/api/education/school-platform") return introspectEducationSession(req, env);
 
     // Phase 6 — aggregate, content-free metrics for the OpenLedger (public).
     if (url.pathname === "/metrics" && req.method === "GET") {
