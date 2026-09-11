@@ -1,6 +1,7 @@
 import { introspectEducationSession } from './introspection.js';
 import { exchangeInvitation, issueInvitation, logoutSession, renewSession, revokeEducationActor } from './session-lifecycle.js';
 import { exchangeBusinessOperatorInvitation, introspectBusinessOperator, logoutBusinessOperator } from './business-operator-session.js';
+import { exchangeGovernmentOperatorInvitation, introspectGovernmentOperator, logoutGovernmentOperator } from './government-operator-session.js';
 const noStore = { 'cache-control': 'no-store', 'content-type': 'application/json; charset=utf-8' };
 const reply = (body, status) => new Response(JSON.stringify(body), { status, headers: noStore });
 
@@ -17,6 +18,9 @@ export default {
     if (pathname === '/api/business/operator/exchange') return exchangeBusinessOperatorInvitation(request, env);
     if (pathname === '/api/business/operator/introspect') return introspectBusinessOperator(request, env);
     if (pathname === '/api/business/operator/logout') return logoutBusinessOperator(request, env);
+    if (pathname === '/api/government/operator/exchange') return exchangeGovernmentOperatorInvitation(request, env);
+    if (pathname === '/api/government/operator/introspect') return introspectGovernmentOperator(request, env);
+    if (pathname === '/api/government/operator/logout') return logoutGovernmentOperator(request, env);
     return reply({ error: 'not_found' }, 404);
   }
 };
