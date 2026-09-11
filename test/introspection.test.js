@@ -30,7 +30,7 @@ test('fails closed without the isolated identity database', async () => {
   assert.equal(response.status, 503);
 });
 
-test('staging Worker exposes only health and Education introspection', async () => {
+test('staging Worker limits its surface to health and Education sessions', async () => {
   const health = await stagingWorker.fetch(new Request('https://identity/health'), {});
   assert.equal(health.status, 200); assert.equal((await health.json()).service, 'brasa-identity-staging');
   for (const path of ['/metrics', '/verify', '/signup', '/session', '/credentials/issue']) {
