@@ -33,6 +33,16 @@ export async function issueInvitation(request, env) {
   await env.IDENTITY_DB.prepare('INSERT INTO session_invitations (id, code_hash, display_id, audience, assurance_level, expires_at, consumed_at, created_at) VALUES (?,?,?,?,?,?,NULL,?)').bind(crypto.randomUUID(), await tokenHash(code), displayId, 'brasa-education', assuranceLevel, expiresAt, now.toISOString()).run();
   return reply({ invitation_code: code, display_id: displayId, audience: 'brasa-education', expires_at: expiresAt }, 201);
 }
+
+export async function revokeEducationActor(request, env) {
+  if (request.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
+  if (!env.IDENTITY_DB) return reply({ error: 'identity_database_unavailable' }, 503);
+  if (!(await serviceAuthorized(request, env))) return reply({ error: 'service_authorization_required' }, 401);
+  const input = await body(request), displayId = String(input?.display_id || '').trim().toUpperCase();
+  if (!/^BRA-[A-Z0-9-]{5,40}$/.test(displayId)) return reply({ error: 'invalid_identity' }, 400);
+  const result = await env.IDENTITY_DB.prepare("UPDATE service_sessions SET revoked_at=? WHERE display_id=? AND audience='brasa-education' AND revoked_at IS NULL").bind(new Date().toISOString(), displayId).run();
+  return reply({ ok: true, revoked: result.meta?.changes || 0 }, 200);
+}
 async function insertSession(env, profile, familyId, familyExpiresAt, rotatedFrom = null) {
   const token = opaqueToken(), now = new Date(), expires = new Date(Math.min(now.getTime() + ACCESS_SECONDS * 1000, Date.parse(familyExpiresAt)));
   await env.IDENTITY_DB.prepare('INSERT INTO service_sessions (id, token_hash, display_id, audience, assurance_level, expires_at, revoked_at, created_at, family_id, family_expires_at, rotated_from) VALUES (?,?,?,?,?,?,NULL,?,?,?,?)').bind(crypto.randomUUID(), await tokenHash(token), profile.displayId, 'brasa-education', profile.assuranceLevel, expires.toISOString(), now.toISOString(), familyId, familyExpiresAt, rotatedFrom).run();

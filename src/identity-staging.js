@@ -1,5 +1,5 @@
 import { introspectEducationSession } from './introspection.js';
-import { exchangeInvitation, issueInvitation, logoutSession, renewSession } from './session-lifecycle.js';
+import { exchangeInvitation, issueInvitation, logoutSession, renewSession, revokeEducationActor } from './session-lifecycle.js';
 const noStore = { 'cache-control': 'no-store', 'content-type': 'application/json; charset=utf-8' };
 const reply = (body, status) => new Response(JSON.stringify(body), { status, headers: noStore });
 
@@ -12,6 +12,7 @@ export default {
     if (pathname === '/api/session/renew') return renewSession(request, env);
     if (pathname === '/api/session/logout') return logoutSession(request, env);
     if (pathname === '/internal/education/invitations') return issueInvitation(request, env);
+    if (pathname === '/internal/education/revoke') return revokeEducationActor(request, env);
     return reply({ error: 'not_found' }, 404);
   }
 };
